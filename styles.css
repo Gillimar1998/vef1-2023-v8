@@ -26,6 +26,10 @@ html {
   display: none;
 }
 
+.show{
+  display: block;
+}
+
 html {
   font-family: var(--font-family);
 }

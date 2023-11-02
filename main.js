@@ -23,12 +23,23 @@ const products = [
   },
 ];
 
+let hasItems = false;
+updateCartStatus();
+
+export function updateCartStatus() {
+  const cartFylki = document.querySelectorAll('.table');
+  const cart = cartFylki[1];
+  const cartLines = cart.querySelectorAll('tr[data-cart-product-id]');
+  hasItems = cartLines.length > 0;
+  showCartContent(hasItems);
+}
+
 /** Bæta vöru í körfu */
 function addProductToCart(product, quantity) {
   // Hér þarf að finna `<tbody>` í töflu og setja `cartLine` inn í það
   const cartFylki = document.querySelectorAll('.table');
   const cart = cartFylki[1];
-  console.log(cart);
+  
 
   if (!cart) {
     console.warn('fann ekki .cart');
@@ -54,7 +65,6 @@ function addProductToCart(product, quantity) {
     const quantityElement = existingCartline.querySelector('.quantity');
     if(quantityElement){
       const existingQuantity = parseInt(quantityElement.textContent);
-      console.log(existingQuantity)
       quantityElement.textContent = (existingQuantity + quantity);
       updateCartLineTotal(existingCartline);
     }
@@ -64,6 +74,7 @@ function addProductToCart(product, quantity) {
     const cartLine = createCartLine(product, quantity);
     cart.appendChild(cartLine);
   }
+  
 
   function updateCartLineTotal(cartLine){
     const priceElement = cartLine.querySelector('.price span');
@@ -71,26 +82,21 @@ function addProductToCart(product, quantity) {
     const totalElement = cartLine.querySelector('.total span');
 
     if (priceElement && quantityElement && totalElement) {
-      console.log(priceElement , quantityElement, totalElement)
 
       const priceText = priceElement.textContent.trim();
       const price = parseFloat(priceText.replace('ISK', '').replace(/[,\s.]/g, ''));
       const quantity = parseInt(quantityElement.textContent);
-
-      console.log(price , quantity)
   
-      
       const newTotal = price * quantity;
   
       
       totalElement.textContent = formatNumber(newTotal);
   }
 }
-  
 
   // Sýna efni körfu
-  showCartContent(true);
-
+  updateCartStatus();
+  updateAll();
   
 }
 
@@ -111,7 +117,6 @@ function submitHandler(event) {
   // á input
   const quantityIntput = parent.querySelector('input[type="number"]');
   const quantity = Number.parseInt(quantityIntput.value)
-  console.log(quantity)
   
 
   // Bætum vöru í körfu (hér væri gott að bæta við athugun á því að varan sé til)
@@ -128,3 +133,47 @@ for (const form of Array.from(addToCartForms)) {
 }
 
 // TODO bæta við event handler á form sem submittar pöntun
+
+const formfylki = document.querySelectorAll('form');
+const form = formfylki[3];
+const gangaFraKaupumButton = form.querySelector('button')
+
+
+gangaFraKaupumButton.addEventListener('click', gangaFraKaupum)
+  
+
+
+function gangaFraKaupum(event){
+  event.preventDefault();
+
+  const receipt = document.querySelector('.receipt');
+
+  receipt.classList.remove('hidden');
+
+}
+
+export function updateAll() {
+  const cartFylki = document.querySelectorAll('.table');
+  const cart = cartFylki[1];
+  const samtalslina = document.querySelector('.table tfoot');
+  const samtals = samtalslina.querySelector('.price')
+
+  const cartLines = cart.querySelectorAll('tr[data-cart-product-id]');
+
+  let totalAmount = 0;
+
+  cartLines.forEach(cartLine =>{
+    const totalElement = cartLine.querySelector('.total span');
+
+    const totalText = totalElement.textContent.trim();
+    const total = parseInt(totalText.replace('ISK', '').replace(/[,\s.]/g, ''));
+
+    totalAmount += total;
+
+  });
+
+
+  samtals.textContent = formatNumber(totalAmount);
+
+
+}
